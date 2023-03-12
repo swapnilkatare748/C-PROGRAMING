@@ -2,8 +2,8 @@
 
 struct point
 {
-	int x;
-	int y;
+	int x;            // struct pointer is use to allocate memory of one or more variables in one
+	int y;            // memory.
 	int z;
 };
 int main()
