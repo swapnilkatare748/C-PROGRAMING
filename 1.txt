@@ -1,0 +1,501 @@
+
+//  Experiment title : ARTHMETIC ADDITION
+
+org 00h
+		sjmp start
+
+addn:	mov A,R1
+		add A,R2
+		RET
+
+start:	mov R1,#03h
+		mov R2,#07h
+		acall addn
+		mov R0,A
+here:	sjmp here
+		END
+
+
+---------------------------------------------------------------------------------------------
+
+
+//  Experiment title : ARTMETIC DIVISION
+
+
+ORG 00H
+		SJMP START
+
+DIVN:	        MOV A,R1
+		MOV B,R2
+		DIV AB
+		RET
+
+START:	        MOV R1,#09h 	
+		MOV R2,#04h	
+		ACALL DIVN
+		MOV R3,A		
+		MOV R4,B		
+HERE:	   SJMP HERE
+		END
+
+
+-----------------------------------------------------------------------------------------------
+
+
+
+
+
+//  Experiment title : THUMB WHEEL SWITCH & SEVEN SEGMENT LEDs INTERFACING WITH 8051
+
+//  Procedure :-  1) Connect Seven Segment to CN5 of Micro51S board
+
+                  2) Thumbwheel to CN4 of Micro51S board
+
+
+
+//                                             Program
+
+
+#include <reg51.h>
+
+unsigned char digit[10] = {0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8, 0x80, 0x90};
+
+void delay(unsigned int time)
+{
+unsigned int i,j;
+for(i=0;i<time;i++)
+	for(j=0;j<50;j++);
+}
+
+
+void main()
+{
+	unsigned int temp1,temp2;
+	P3 = 0x00;		
+	P1 = 0x00;		
+	P2 = 0x00;	   	
+	
+	while(1)
+	{
+		temp2 = P2>>4;		
+		temp1 = P2 & 0x0F;	
+
+		P1 = ~0x04;			
+		P3 = digit[temp1];	
+		delay(20);
+		P3 = 0x00;			
+
+		P1 = ~0x02;			
+		P3 = digit[temp2];	
+		delay(20);
+		P3 = 0x00;			
+	}
+}
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//        Experiment title : TRAFFIC LIGHT CONTROL INTERFACING
+
+
+
+//     Procedure:- 	1) Connect TLC CN1 to Micro51S Board CN3
+	                2) Connect TLC CN2 to Micro51S Board CN4
+	
+	
+                                           //   PROGRAM   
+
+
+#include <reg51.h>
+
+const unsigned int states[8] = {0x0E01,0x0E10,0xD02,0xD20,0xB04,0xB40,0x708,0x780};
+
+void delay(unsigned int time)
+{
+	unsigned int i,j;
+	for(i=0;i<time;i++)
+		for(j=0;j<5000;j++);
+}
+
+int main()
+{
+	unsigned int i;
+	P1 = 0x00;
+	P2 = 0x00;
+	while(1)
+	{
+		for(i=0;i<8;i=i+2)
+		{
+			P1 = states[i] & 0xFF;
+			P2 = (states[i]>>8) & 0xFF;
+			delay(200);
+			P1 = states[i+1] & 0xFF;
+			P2 = (states[i+1]>>8) & 0xFF;
+			delay(50);
+
+		}	
+	}
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//        Experiment title : LCD INTERFACING
+
+
+
+//    Procedure:-  connect CN2 (Port0) of Micro51S board to the connector on the LCD board.
+
+//                                         PROGRAM   
+
+
+
+
+  U equ 31        
+  L equ 32         
+
+  Port equ P0      
+  RS equ P3.2      
+  EN equ P3.3      
+
+  
+  ORG 0000h
+  ACALL init
+
+  MOV A, #'M'     
+  ACALL lcd_data     
+  MOV A, #'i'
+  ACALL lcd_data
+  MOV A, #'c'
+  ACALL lcd_data
+  MOV A, #'r'
+  ACALL lcd_data
+  MOV A,#'o'
+  ACALL lcd_data
+  MOV A,#'E'
+  ACALL lcd_data
+  MOV A,#'m'
+  ACALL lcd_data
+  MOV A,#'b'
+  ACALL lcd_data
+  MOV A,#'e'
+  ACALL lcd_data
+  MOV A, #'d'
+  ACALL lcd_data
+  MOV A, #'d'
+  ACALL lcd_data
+  MOV A, #'e'
+  ACALL lcd_data
+  MOV A, #'d'
+  ACALL lcd_data
+
+  MOV A, #0c0H         
+  ACALL lcd_cmd  
+
+  MOV A, #'T'     
+  ACALL lcd_data     
+  MOV A, #'e'
+  ACALL lcd_data
+  MOV A, #'c'
+  ACALL lcd_data
+  MOV A, #'h'
+  ACALL lcd_data
+  MOV A, #'n'
+  ACALL lcd_data
+  MOV A, #'o'
+  ACALL lcd_data
+  MOV A, #'l'
+  ACALL lcd_data
+  MOV A, #'o'
+  ACALL lcd_data
+  MOV A, #'g'
+  ACALL lcd_data
+  MOV A, #'i'
+  ACALL lcd_data
+  MOV A, #'e'
+  ACALL lcd_data
+  MOV A, #'s'	
+  ACALL lcd_data
+
+  SJMP $     
+
+
+separator:
+   MOV U,A        
+   ANL U,#0F0H    
+   SWAP A         
+   ANL A,#0F0H    
+   MOV L,A        
+   RET            
+
+
+
+move_to_Port:
+   MOV port,A       
+   SETB EN    
+   ACALL DELAY   
+   CLR EN     
+   ACALL DELAY   
+   RET     
+
+
+
+   lcd_cmd:
+    CLR RS     
+    ACALL separator     
+    MOV A, U     
+    ACALL move_to_port  
+    MOV A, L            
+    ACALL move_to_port  
+    RET       
+
+
+
+  lcd_data:
+   SETB RS            
+   ACALL separator    
+   MOV A, U           
+   ACALL move_to_port 
+   MOV A, L           
+   ACALL move_to_port 
+   RET                
+
+
+init:
+   ACALL delay     
+   ACALL delay
+
+   MOV port, #20h  
+   CLR RS   
+   SETB EN         
+   ACALL delay
+   CLR EN
+
+   MOV A, #20H
+   ACALL lcd_cmd
+   MOV A, #28H
+   ACALL lcd_cmd
+   MOV A, #0CH
+   ACALL lcd_cmd
+   MOV A, #06H
+   ACALL lcd_cmd
+   MOV A, #01H
+   ACALL lcd_cmd
+   RET
+
+
+delay:
+   MOV R0, #70H
+  L2: MOV R1,#0FH
+  L1: DJNZ R1, L1
+   DJNZ R0, L2
+   RET
+
+
+end
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+
+
+//        Experiment title : INTERFACING DAC
+
+
+
+//                                         PROGRAM FOR TRIANGULAR WAVEFORM
+
+
+#include <REG51.h>
+
+void delay_ramp(unsigned int time)
+{
+  unsigned int i,j; 
+  for(i=time;i>0;i--)
+  {
+  	for(j=0;j<10;j++);
+  }
+    
+}
+
+
+void send_dac(unsigned int dat)
+{
+	P2 = dat;
+}
+
+void main(void)
+{
+  unsigned int a,state=0xff;
+
+   while(1)
+   {
+  	// rising ramp edge
+	 for(a=0x0;a<0xFF;a++)
+	 {
+	 	send_dac(a);
+		delay_ramp(1);
+	 }
+  	// falling ramp edge
+	 for(a=0xFF;a>0;a--)
+	 {
+	 	send_dac(a);
+		delay_ramp(1);
+	 }
+  	}
+}
+
+
+
+
+//                                     PROGRAM FOR SINE WAVEFORM
+
+
+
+#include <REG51.h>
+
+unsigned int lut[20]={0,10,17,25,35,42,50,57,65,71,77,82,87,91,95,97,99,100,100};
+
+void delay_time(unsigned int time)
+{
+  unsigned int i,j; 
+  for(i=time;i>0;i--)
+  {
+  	for(j=0;j<50;j++);
+  }
+    
+}
+
+
+void send_dac(unsigned int dat)
+{
+  P1 = dat;
+}
+
+void main(void)
+{
+  signed char ang=0;
+
+   while(1)
+   {
+   				
+       for(ang = 0;ang < 90; ang+=5)
+	  {
+	   	send_dac(lut[ang/5]+0x7F);
+	    delay_time(0);
+	  }
+				//90-180 deg
+	   for(ang = 90;ang > 0; ang-=5)
+	  {
+	  	  	send_dac(lut[ang/5]+0x7F);
+		   delay_time(0);
+	  }
+				//180-270 deg
+	   for(ang = 0;ang < 90; ang+=5)
+	  {
+	  	  	send_dac(-lut[ang/5]-0x7F);
+		   delay_time(0);
+	  }
+
+				 //270-360 deg
+	   for(ang = 90;ang > 0; ang-=5)
+	  {
+	  	  	send_dac(-lut[ang/5]-0x7F);
+		   delay_time(0);
+	  }
+	  
+	}
+}  
+
+
+void main(void)
+{
+  signed char ang=0;
+
+   while(1)
+   {
+   				//0-90 deg
+     	  for(ang = 0;ang < 90; ang+=5)
+	  {
+	  	  	send_dac(lut[ang/5]);
+		   delay_time(0);
+	  }
+				//90-180 deg
+	   for(ang = 90;ang > 0; ang-=5)
+	  {
+	  	  	send_dac(lut[ang/5]);
+		   delay_time(0);
+	  }
+				//180-270 deg
+	   for(ang = 0;ang < 90; ang+=5)
+	  {
+	  	  	send_dac(-lut[ang/5]);
+		   delay_time(0);
+	  }
+
+				 //270-360 deg
+	   for(ang = 90;ang > 0; ang-=5)
+	  {
+	  	  	send_dac(-lut[ang/5]);
+		   delay_time(0);
+	  }
+	}
+}  
+
+
+
+//                                          PROGRAM FOR SQUARE WAVEFORM
+
+
+
+#include<REG51.h>
+
+void delay_time(unsigned int time)
+{
+  unsigned int i,j; 
+  for(i=time;i>0;i--)
+  {
+  	for(j=0;j<20;j++);
+  }
+ 
+    
+}
+
+void send_dac(unsigned int dat)
+{
+	P1 = dat;
+}
+
+
+void main(void)
+{
+ unsigned int delay=0x0F;
+ unsigned char state=0xFF;
+ send_dac(0x7F);
+ while(1)
+ {
+	send_dac(state);
+	delay_time(delay);
+    send_dac(~state);
+	delay_time(delay); 
+ }
+}
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+ 	
